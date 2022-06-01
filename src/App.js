@@ -1,6 +1,5 @@
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min';
+
 import {BrowserRouter as Router,Routes,Route}from 'react-router-dom';
 import {Suspense} from 'react';
 import Login from './pages/Login';

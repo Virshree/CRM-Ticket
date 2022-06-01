@@ -1,33 +1,106 @@
 import React, { useState } from 'react';
 import {Dropdown,DropdownButton} from 'react-bootstrap';
+import {userSignup,userLogin} from '../api/auth';
 function Login() {
     const [showSigup,setShowSigup] =useState(false);
     const [userType,setuserType]=useState("CUSTOMER");
+    const [userSignupData,setuserSignupData] = useState({});
+    const [message,setMessage] = useState("");
+    const [userLoginData,setUserLoginData] = useState({});
     const toggleSignup=()=>{
         setShowSigup(!showSigup)
     }
     const handleSelect=(e)=>{
         setuserType(e);
     }
+    //grab all the values 
+    const updateSignupData=(e)=>{
+        userSignupData[e.target.id]=e.target.value;
+        console.log(userSignupData);
+    }
+    const updateLoginData=(e)=>{
+        userLoginData[e.target.id]=e.target.value;
+        console.log(userLoginData);
+    }
+    const signupFn=(e)=>{
+         const username=userSignupData.username;
+         const userId=userSignupData.userId;
+         const email=userSignupData.email;
+         const password=userSignupData.password;
+         const data={
+             name:username,
+             userId:userId,
+             email:email,
+             password:password,
+             userType:userType,
+         }
+         console.log('DATA',data);
+
+         e.preventDefault();
+
+         userSignup(data).then(function(response){
+             console.log(response);
+
+             if(response.status===201){
+               window.location.href='/'
+             }
+         })
+         .catch(function(error){
+             if(error.response.status ===400){
+                 setMessage(error.response.data.message);
+             }
+             else{
+                 console.log(error);
+             }
+         })
+
+
+    }
+    const loginFn=(e)=>{
+        const userId=document.getElementById("userId").value;
+        const password=document.getElementById("password").value;
+
+        const data={
+            userId:userId,
+            password:password
+        }
+        e.preventDefault();
+        userLogin(data).then(function(response) {
+            if(response.status===200){
+                localStorage.setItem("name",response.data.name);
+            }
+            if(response.data.userType==="CUSTOMER"){
+                window.location.href='/customer';
+            }
+        }).catch(function(error){
+             if(error.response.status ===400){
+                 setMessage(error.response.data.message);
+             }
+             else{
+                 console.log(error);
+             }
+         })
+    }
   return (
     
     <div className="bg-primary d-flex justify-content-center align-items-center vh-100">
-        <div className="card m-20 p-5">
+        <div className="card m-5 p-5" >
             <div className="row">
                 <div className="col">
                     {!showSigup ? (
                         <div className="login">
                             {/*user id ,password,login button,toggle text*/}
-                           <form >
-                               <h2 className='text-center'>Login</h2>
+                           <form onSubmit={loginFn}>
+                               <h2 className='text-center '>LOGIN</h2>
+                               <br/>
                                <div className="input-group m-1 ">
                                     <input type="text" className='form-control'
-                                    placeholder='User ID'/>
+                                    placeholder='User ID' id='userId' onChange={updateLoginData}/>
                                 </div>
                                    
                                 <div className="input-group m-1 ">
                                      <input type="password" className='form-control'
-                                    placeholder='Password'/>
+                                    placeholder='Password' id='password' onChange={updateLoginData}/>
                                   </div>
 
                                 <div className="input-group  m-1">
@@ -40,23 +113,26 @@ function Login() {
                            </form>
                         </div>
                     ):(<div className='signup'>
-                             <form >
-                               <h2 className='text-center'>Signup</h2>
+                             <form onSubmit={signupFn} >
+                               <h2 className='text-center'>SIGNUP</h2>
+                               <br/>
                                <div className="input-group m-1 ">
                                     <input type="text" className='form-control'
-                                    placeholder='User ID'/>
+                                    placeholder='User ID' id='userId'
+                                    onChange={updateSignupData}/>
                                 </div>
                                  <div className="input-group m-1 ">
                                     <input type="text" className='form-control'
-                                    placeholder='Username'/>
+                                    placeholder='Username' id='username'
+                                     onChange={updateSignupData}/>
                                 </div> 
                                
                                     <input type="email" className='form-control m-1'
-                                    placeholder='Email'/>
+                                    placeholder='Email' id='email' onChange={updateSignupData}/>
                                
                                 <div className="input-group m-1 ">
                                      <input type="password" className='form-control'
-                                    placeholder='Password'/>
+                                    placeholder='Password' id='password' onChange={updateSignupData}/>
                                   </div>
 
                                  <div className="input-group m-1 ">
@@ -64,12 +140,13 @@ function Login() {
                                      <DropdownButton 
                                      align="end"
                                      title={userType}
-                                     variant='light'
+                                     variant='secondary'
                                      className='mx-1'
+                                    
                                      onSelect={handleSelect}>
                                          <Dropdown.Item eventKey='CUSTOMER'>CUSTOMER</Dropdown.Item>
                                           <Dropdown.Item eventKey='ENGINEER'>ENGINEER</Dropdown.Item>
-                                         </DropdownButton>
+                                    </DropdownButton>
                                   </div>
 
 
@@ -79,7 +156,9 @@ function Login() {
                                 <div className='text-info text-center' onClick={toggleSignup}>
                                 Already have an account ?Login 
                                 </div>
-                               
+                               <div>
+                                   <div className="text-danger">{message}</div>
+                               </div>
                            </form>
                     </div>)}
                 </div>
