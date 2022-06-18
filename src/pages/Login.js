@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import {Dropdown,DropdownButton} from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import {userSignup,userLogin} from '../api/auth';
+
+
 function Login() {
     const [showSigup,setShowSigup] =useState(false);
     const [userType,setuserType]=useState("CUSTOMER");
     const [userSignupData,setuserSignupData] = useState({});
     const [message,setMessage] = useState("");
-    const [userLoginData,setUserLoginData] = useState({});
+    //const [userLoginData,setUserLoginData] = useState({});
     const toggleSignup=()=>{
         setShowSigup(!showSigup)
     }
@@ -18,10 +21,10 @@ function Login() {
         userSignupData[e.target.id]=e.target.value;
         console.log(userSignupData);
     }
-    const updateLoginData=(e)=>{
-        userLoginData[e.target.id]=e.target.value;
-        console.log(userLoginData);
-    }
+    // const updateLoginData=(e)=>{
+    //     userLoginData[e.target.id]=e.target.value;
+    //     console.log(userLoginData);
+    // }
     const signupFn=(e)=>{
          const username=userSignupData.username;
          const userId=userSignupData.userId;
@@ -32,21 +35,23 @@ function Login() {
              userId:userId,
              email:email,
              password:password,
-             userType:userType,
+             userTypes:userType,
          }
-         console.log('DATA',data);
 
          e.preventDefault();
+        console.log('DATA',data);
+
 
          userSignup(data).then(function(response){
              console.log(response);
 
-             if(response.status===201){
-               window.location.href='/'
+             if(response === 201){
+               history(0);
              }
+             
          })
          .catch(function(error){
-             if(error.response.status ===400){
+             if(error.response.status === 400){
                  setMessage(error.response.data.message);
              }
              else{
@@ -56,22 +61,50 @@ function Login() {
 
 
     }
+    let history=useNavigate();
+   
     const loginFn=(e)=>{
-        const userId=document.getElementById("userId").value;
-        const password=document.getElementById("password").value;
+       
+        const userId=userSignupData.userId;
+        const password=userSignupData.password;
 
         const data={
             userId:userId,
             password:password
         }
+       
         e.preventDefault();
+         console.log(data);
+
         userLogin(data).then(function(response) {
-            if(response.status===200){
+            console.log(response);
+            if(response.status === 200){
+                if(response.data.message){
+                    setMessage(response.data.message);
+                }
+                else{
+
+                
                 localStorage.setItem("name",response.data.name);
+                localStorage.setItem("userId",response.data.userId);
+                localStorage.setItem("email",response.data.email);
+                localStorage.setItem("userTypes",response.data.userTypes);
+                localStorage.setItem("userStatus",response.data.userStatus);
+                localStorage.setItem("token",response.data.accessToken);
+                if(response.data.userTypes === "CUSTOMER"){
+                    history("/customer");
+
+                     }
+                else if(response.data.userTypes === "ENGINEER"){
+                    history("/engineer");
+                     }
+                else{
+                   history("/admin");
+                }
             }
-            if(response.data.userType==="CUSTOMER"){
-                window.location.href='/customer';
-            }
+        }   
+
+            
         }).catch(function(error){
              if(error.response.status ===400){
                  setMessage(error.response.data.message);
@@ -95,12 +128,12 @@ function Login() {
                                <br/>
                                <div className="input-group m-1 ">
                                     <input type="text" className='form-control'
-                                    placeholder='User ID' id='userId' onChange={updateLoginData}/>
+                                    placeholder='User ID' id='userId' onChange={updateSignupData}/>
                                 </div>
                                    
                                 <div className="input-group m-1 ">
                                      <input type="password" className='form-control'
-                                    placeholder='Password' id='password' onChange={updateLoginData}/>
+                                    placeholder='Password' id='password' onChange={updateSignupData}/>
                                   </div>
 
                                 <div className="input-group  m-1">
@@ -137,6 +170,7 @@ function Login() {
 
                                  <div className="input-group m-1 ">
                                      <span className='text-muted'>User Type</span>
+
                                      <DropdownButton 
                                      align="end"
                                      title={userType}
