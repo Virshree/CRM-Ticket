@@ -34,16 +34,17 @@ function App() {
        <Route path="unauthorized" element={<Unauthorized />} />   
        {/*Protected Routes are 
        provided bcoz no of one can access admin,customer,engineer*/}
-      {/* <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]}/>} > */}
+      <Route element={<RequireAuth allowedRoles={[ROLES.ADMIN]}/>} >
         <Route   path="/admin"  exact element={<Admin/>}/>
-      {/* </Route>  */}
+      </Route> 
       
       <Route element={<RequireAuth allowedRoles={[ROLES.CUSTOMER]}/>} >
         <Route   path="/customer"  exact element={<Customer/>}/>
       </Route>
-       {/* <Route element={<RequireAuth allowedRoles={[ROLES.ENGINEER]}/>} > */}
-        <Route   path="/engineer"  exact element={<Engineer/>}/>
-      {/* </Route> */}
+       <Route element={<RequireAuth allowedRoles={[ROLES.ENGINEER]}/>} >
+      
+           <Route path="/engineer" element={<Engineer />} />
+      </Route>
 
         <Route path="/*" element={<Notfound />} />
    

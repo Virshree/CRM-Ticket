@@ -5,37 +5,35 @@ import {userSignup,userLogin} from '../api/auth';
 
 
 function Login() {
-    const [showSigup,setShowSigup] =useState(false);
+    const [showSignup,setShowSignup] =useState(false);
+    const [userId, setUserId] = useState("")
+    const [userPassword, setUserPassword] = useState("")
+    const [userName, setUserName] = useState("")
+    const [userEmail, setUserEmail] = useState("")
     const [userType,setuserType]=useState("CUSTOMER");
-    const [userSignupData,setuserSignupData] = useState({});
+   // const [userSignupData,setuserSignupData] = useState({});
     const [message,setMessage] = useState("");
+      const [error, setError] = useState(false)
+
     //const [userLoginData,setUserLoginData] = useState({});
-    const toggleSignup=()=>{
-        setShowSigup(!showSigup)
-    }
+
     const handleSelect=(e)=>{
         setuserType(e);
     }
     //grab all the values 
-    const updateSignupData=(e)=>{
-        userSignupData[e.target.id]=e.target.value;
-        console.log(userSignupData);
-    }
+
     // const updateLoginData=(e)=>{
     //     userLoginData[e.target.id]=e.target.value;
     //     console.log(userLoginData);
     // }
     const signupFn=(e)=>{
-         const username=userSignupData.username;
-         const userId=userSignupData.userId;
-         const email=userSignupData.email;
-         const password=userSignupData.password;
+         
          const data={
-             name:username,
-             userId:userId,
-             email:email,
-             password:password,
-             userTypes:userType,
+            name: userName,
+            userId: userId,
+            email: userEmail,
+            userType: userType,
+            password: userPassword
          }
 
          e.preventDefault();
@@ -46,12 +44,17 @@ function Login() {
              console.log(response);
 
              if(response === 201){
-               history(0);
+                setShowSignup(false);
+               clearState();
+                setError(false);
+              setMessage("User Signed Up Successfully...")
              }
              
          })
          .catch(function(error){
              if(error.response.status === 400){
+
+                setError(true);
                  setMessage(error.response.data.message);
              }
              else{
@@ -65,12 +68,9 @@ function Login() {
    
     const loginFn=(e)=>{
        
-        const userId=userSignupData.userId;
-        const password=userSignupData.password;
-
         const data={
             userId:userId,
-            password:password
+            password:userPassword
         }
        
         e.preventDefault();
@@ -84,7 +84,6 @@ function Login() {
                 }
                 else{
 
-                
                 localStorage.setItem("name",response.data.name);
                 localStorage.setItem("userId",response.data.userId);
                 localStorage.setItem("email",response.data.email);
@@ -111,16 +110,46 @@ function Login() {
              }
              else{
                  console.log(error);
+                  setMessage(error.response.data.message);
              }
          })
     }
+
+     const updateSignupData = (e) => {
+    setMessage("")
+    if(e.target.id === "userId")
+      setUserId(e.target.value)
+    else if(e.target.id === "password")
+      setUserPassword(e.target.value)
+    else if(e.target.id === "password")
+      setUserPassword(e.target.value)
+    else if(e.target.id === "username")
+      setUserName(e.target.value)
+    else
+      setUserEmail(e.target.value)
+  };
+  const toggleSignup = () => {
+    clearState();
+    setShowSignup(!showSignup);
+
+  }
+    const clearState = () => {
+    setMessage("")
+    setError(false)
+    setUserId("")
+    setUserPassword("")
+    setUserName("")
+    setUserEmail("")
+
+
+  }
   return (
     
     <div className="bg-primary d-flex justify-content-center align-items-center vh-100">
         <div className="card m-5 p-5" >
             <div className="row">
                 <div className="col">
-                    {!showSigup ? (
+                    {!showSignup ? (
                         <div className="login">
                             {/*user id ,password,login button,toggle text*/}
                            <form onSubmit={loginFn}>
@@ -128,21 +157,28 @@ function Login() {
                                <br/>
                                <div className="input-group m-1 ">
                                     <input type="text" className='form-control'
-                                    placeholder='User ID' id='userId' onChange={updateSignupData}/>
+                                    placeholder='User ID' id='userId'
+                                     onChange={updateSignupData}/>
                                 </div>
                                    
                                 <div className="input-group m-1 ">
+                                    
                                      <input type="password" className='form-control'
-                                    placeholder='Password' id='password' onChange={updateSignupData}/>
+                                    placeholder='Password ' id='password'
+                                     onChange={updateSignupData}
+                                    />
+                                    
                                   </div>
 
                                 <div className="input-group  m-1">
-                                   <input type="submit" className='form-control btn btn-primary' value="Log in"/>
+                                   <input type="submit" className='form-control
+                                    btn btn-primary' value="Log in"/>
                                 </div>
-                                <div className='text-info text-center ' onClick={toggleSignup}>
+                                <div className='text-info text-center '
+                                 onClick={()=>toggleSignup()}>
                                     Don't have  an account ? Signup
                                 </div>
-                               
+                                 <div className="text-danger text-center">{message}</div>
                            </form>
                         </div>
                     ):(<div className='signup'>
@@ -187,14 +223,15 @@ function Login() {
                                 <div className="input-group  m-1">
                                    <input type="submit" className='form-control btn btn-primary' value="Sign Up"/>
                                 </div>
-                                <div className='text-info text-center' onClick={toggleSignup}>
+                                <div className='text-info text-center' onClick={()=>toggleSignup()}>
                                 Already have an account ?Login 
                                 </div>
                                <div>
-                                   <div className="text-danger">{message}</div>
+                                <div className="text-danger">{message}</div>
                                </div>
                            </form>
-                    </div>)}
+                    </div>
+                    )}
                 </div>
             </div>
         </div>
